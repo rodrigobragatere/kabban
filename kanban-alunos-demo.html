@@ -10,13 +10,20 @@
   <header>
     <div>
       <h1>Quadro Kanban — Alunos</h1>
-      <p>Demonstração: arraste os cartões entre as colunas.</p>
+      <p>Escolha uma atividade no quadro ao lado, indique o aluno e adicione; depois arraste entre as colunas.</p>
     </div>
     <div class="toolbar">
       <input type="text" id="nomeAluno" placeholder="Nome do aluno" maxlength="80" />
       <button type="button" id="btnAdicionar">Adicionar à lista</button>
     </div>
   </header>
+
+  <div class="layout">
+  <aside class="activity-panel" aria-labelledby="activity-panel-title">
+    <h2 id="activity-panel-title" class="activity-panel-title">Atividades</h2>
+    <p class="activity-panel-hint">Selecione uma atividade. Ela será associada ao aluno no cartão.</p>
+    <ul class="activity-list" id="activityCatalog"></ul>
+  </aside>
 
   <main class="board" id="board">
     <section class="column" data-status="todo">
@@ -43,137 +50,10 @@
       <div class="column-body" data-drop="done" aria-label="Concluídos"></div>
     </section>
   </main>
+  </div>
 
-  <footer>Lab — Engenharia de requisitos · protótipo HTML, CSS externo e JS</footer>
+  <footer>Lab — Engenharia de requisitos · HTML, CSS e JS em ficheiros separados</footer>
 
-  <script>
-    (function () {
-      const turmas = ["Turma A", "Turma B", "Turma C", "Módulo JS"];
-
-      const demoAlunos = [
-        { nome: "Ana Silva", turma: "Turma A", tag: "Frontend" },
-        { nome: "Bruno Costa", turma: "Turma B", tag: "Backend" },
-        { nome: "Carla Mendes", turma: "Turma A", tag: "Full stack" },
-        { nome: "Diego Souza", turma: "Turma C", tag: "QA" },
-        { nome: "Elena Rocha", turma: "Módulo JS", tag: "Frontend" },
-      ];
-
-      let dragged = null;
-
-      function randomTurma() {
-        return turmas[Math.floor(Math.random() * turmas.length)];
-      }
-
-      function createCard({ nome, turma, tag }) {
-        const card = document.createElement("article");
-        card.className = "card";
-        card.draggable = true;
-        card.dataset.nome = nome;
-        card.innerHTML =
-          '<h3 class="card-name"></h3>' +
-          '<p class="card-meta">' +
-          '<span class="turma"></span>' +
-          '<span class="tag"></span>' +
-          "</p>";
-        card.querySelector(".card-name").textContent = nome;
-        card.querySelector(".turma").textContent = turma;
-        card.querySelector(".tag").textContent = tag || "Aluno";
-
-        card.addEventListener("dragstart", function (e) {
-          dragged = card;
-          card.classList.add("dragging");
-          e.dataTransfer.effectAllowed = "move";
-          e.dataTransfer.setData("text/plain", nome);
-        });
-
-        card.addEventListener("dragend", function () {
-          card.classList.remove("dragging");
-          dragged = null;
-          document.querySelectorAll(".column-body.drag-over").forEach(function (el) {
-            el.classList.remove("drag-over");
-          });
-        });
-
-        return card;
-      }
-
-      function columnBody(status) {
-        return document.querySelector('.column-body[data-drop="' + status + '"]');
-      }
-
-      function updateCounts() {
-        ["todo", "doing", "done"].forEach(function (status) {
-          const body = columnBody(status);
-          const n = body.querySelectorAll(".card").length;
-          const badge = document.querySelector('[data-column-count="' + status + '"]');
-          if (badge) badge.textContent = String(n);
-        });
-      }
-
-      function setupDropZones() {
-        document.querySelectorAll(".column-body[data-drop]").forEach(function (zone) {
-          zone.addEventListener("dragover", function (e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
-            zone.classList.add("drag-over");
-          });
-
-          zone.addEventListener("dragleave", function (e) {
-            if (!zone.contains(e.relatedTarget)) zone.classList.remove("drag-over");
-          });
-
-          zone.addEventListener("drop", function (e) {
-            e.preventDefault();
-            zone.classList.remove("drag-over");
-            if (dragged && zone !== dragged.parentElement) {
-              zone.appendChild(dragged);
-              updateCounts();
-            }
-          });
-        });
-      }
-
-      function seedDemo() {
-        const todo = columnBody("todo");
-        const doing = columnBody("doing");
-        const done = columnBody("done");
-
-        demoAlunos.slice(0, 2).forEach(function (a) {
-          todo.appendChild(createCard(a));
-        });
-        demoAlunos.slice(2, 4).forEach(function (a) {
-          doing.appendChild(createCard(a));
-        });
-        done.appendChild(createCard(demoAlunos[4]));
-        updateCounts();
-      }
-
-      document.getElementById("btnAdicionar").addEventListener("click", function () {
-        const input = document.getElementById("nomeAluno");
-        const nome = (input.value || "").trim();
-        if (!nome) {
-          input.focus();
-          return;
-        }
-        const todo = columnBody("todo");
-        todo.appendChild(
-          createCard({
-            nome: nome,
-            turma: randomTurma(),
-            tag: "Novo",
-          })
-        );
-        input.value = "";
-        updateCounts();
-      });
-
-      document.getElementById("nomeAluno").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") document.getElementById("btnAdicionar").click();
-      });
-
-      setupDropZones();
-      seedDemo();
-    })();
-  </script>
+  <script src="kanban-alunos-demo.js"></script>
 </body>
 </html>
